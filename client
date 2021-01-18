@@ -1,0 +1,52 @@
+#!/usr/bin/env python
+
+import os
+import glob
+import sys
+import socket
+import hashlib
+
+sys.path.append('gen-py')
+sys.path.insert(0, glob.glob('/home/cs557-inst/thrift-0.13.0/lib/py/build/lib*')[0])
+
+from chord import FileStore
+import hashlib
+import socket
+from chord.ttypes import SystemException, RFileMetadata, RFile, NodeID
+
+from thrift.transport import TSocket
+from thrift import Thrift
+from thrift.transport import TTransport
+from thrift.protocol import TBinaryProtocol
+from thrift.server import TServer
+
+
+def main():
+    transport = TSocket.TSocket("remote06.cs.binghamton.edu", "9081")
+    transport = TTransport.TBufferedTransport(transport)
+    protocol = TBinaryProtocol.TBinaryProtocol(transport)
+    client = FileStore.Client(protocol)
+
+    transport.open()
+
+
+## readFile
+
+    #todo: handle return type
+    try:
+        ret =  client.readFile("abc.txt");
+
+        print("Calling readFile()..")
+        print('  FileName: ', ret.meta.filename)
+        print('  Version: ', ret.meta.version)
+        print('  Content: ', ret.content)
+    except SystemException as e:
+        print(e)
+
+    transport.close()
+if __name__ == '__main__':
+
+    try:
+        main()
+    except Thrift.TException as tx:
+        print('%s' % tx.message)
